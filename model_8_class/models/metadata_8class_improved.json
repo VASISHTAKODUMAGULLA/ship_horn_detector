@@ -1,0 +1,31 @@
+{
+  "model_type": "Gradient Boosting",
+  "test_accuracy": 0.7275,
+  "cv_accuracy": 0.7412500000000001,
+  "feature_dims": {
+    "yamnet": 3072,
+    "custom": 51,
+    "total": 3123
+  },
+  "class_names": {
+    "0": "alter_starboard (1 short)",
+    "1": "alter_port (2 short)",
+    "2": "astern_propulsion (3 short)",
+    "3": "doubt_intentions (5 short)",
+    "4": "approaching_bend (1 long)",
+    "5": "overtake_starboard (1 long + 1 short)",
+    "6": "overtake_port (1 long + 2 short)",
+    "7": "agreement (long-short-long-short)"
+  },
+  "num_classes": 8,
+  "num_train_samples": 1600,
+  "num_test_samples": 400,
+  "improvements": [
+    "Enhanced blast pattern detection",
+    "Long/short blast classification",
+    "Sequence analysis features",
+    "Energy distribution features",
+    "Balanced class weights",
+    "More trees and deeper RF"
+  ]
+}

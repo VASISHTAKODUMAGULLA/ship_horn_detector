@@ -1,0 +1,20 @@
+{
+  "model_type": "Random Forest",
+  "test_accuracy": 1.0,
+  "cv_accuracy": 0.9824606918238994,
+  "feature_dims": {
+    "yamnet": 3072,
+    "custom": 35,
+    "total": 3107
+  },
+  "class_names": {
+    "0": "alter_starboard (1 short)",
+    "1": "doubt_intentions (5 short)",
+    "2": "approaching_bend (1 long)",
+    "3": "agreement (long-short-long-short)"
+  },
+  "num_classes": 4,
+  "num_train_samples": 799,
+  "num_test_samples": 200,
+  "notes": "Simplified 4-class version for high accuracy"
+}

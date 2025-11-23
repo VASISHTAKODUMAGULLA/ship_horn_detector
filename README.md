@@ -1,31 +1,32 @@
 # 🚢 Ship Horn Signal Classifier
 
-A machine learning system for classifying ship horn signals according to COLREG (International Regulations for Preventing Collisions at Sea) standards. This project implements both 4-class and 8-class classification models using advanced audio processing techniques.
+A machine learning system for classifying ship horn signals according to COLREG (International Regulations for Preventing Collisions at Sea) standards. This project implements complete 8-class classification using advanced audio processing techniques and hybrid deep learning models.
 
 ---
 
 ## 📋 Table of Contents
 - [Features](#features)
 - [Getting Started](#getting-started)
-- [Model 4-Class](#model-4-class-4-classes)
-- [Model 8-Class (Improved)](#model-8-class-improved-8-classes)
+- [COLREG Classes](#colreg-classes-8-classes)
+- [Key Improvements](#key-improvements)
 - [Technical Details](#technical-details)
-- [Usage Examples](#usage-examples)
+- [Usage](#usage)
 - [Project Structure](#project-structure)
+- [Known Issues & Solutions](#known-issues--solutions)
 
 ---
 
 ## ✨ Features
 
-- **Dual Classification Systems**: 4-class (basic) and 8-class (complete COLREG coverage)
-- **Hybrid Models**: Combines LSTM neural networks with traditional ML (Random Forest)
+- **Complete COLREG Coverage**: All 8 ship horn signal classes from Rule 34
+- **Hybrid Models**: Combines LSTM neural networks with Random Forest
 - **Advanced Audio Processing**:
   - YAMNet embeddings for deep audio representation
   - Band-pass filtering (50-600 Hz) to remove wind noise and hiss
   - Enhanced blast pattern detection using threshold-based segmentation
   - Temporal sequence analysis for long+short pattern recognition
 - **Pattern-Based Correction**: Rule-based validation to catch obvious model errors
-- **High Accuracy**: 96.5% test accuracy on 8-class model
+- **High Accuracy**: 96.5% test accuracy with intelligent error correction
 
 ---
 
@@ -55,47 +56,10 @@ pip install -r requirements.txt
 
 ---
 
-## 📊 Model 4-Class (4 Classes)
+## 🎯 COLREG Classes (8 Classes)
 
-### Location
-The complete trained model is saved in the `Model_4_class/` folder.
+### Complete Classification System
 
-### Classes
-| Class | Description                   | COLREG Rule |
-|-------|-------------------------------|-------------|
-| 0     | 1 short blast                | Rule 34(a) - Altering course to starboard |
-| 3     | 5 short blasts               | Rule 34(d) - Doubt/warning signal |
-| 4     | 1 long blast                 | Rule 34(e) - Approaching blind bend |
-| 7     | long-short-long-short pattern | Rule 34(c) - Agreement signal |
-
-### Generate Dataset (Optional)
-If you'd like to generate the dataset again:
-```bash
-cd Model_4_class
-python generate_dataset.py
-```
-> You can customize the number of samples per class by changing the variables in the script (default: 250 each).
-
-### Train Model
-```bash
-cd Model_4_class
-python train_model.py
-```
-
-### Run Inference
-```bash
-cd Model_4_class
-python inference.py 6.wav
-```
-
----
-
-## 🎯 Model 8-Class Improved (8 Classes)
-
-### Location
-All files are in the `model_8_class/` folder.
-
-### Complete COLREG Classes
 | Class | Description                   | Pattern | COLREG Rule |
 |-------|-------------------------------|---------|-------------|
 | 0     | Alter course to starboard    | 1 short | Rule 34(a)(i) |
@@ -107,31 +71,37 @@ All files are in the `model_8_class/` folder.
 | 6     | Overtaking on port side      | 1 long + 2 short | Rule 34(c)(ii) |
 | 7     | Agreement signal             | long-short-long-short | Rule 34(c) |
 
-### Key Improvements
+**COLREG Blast Specifications:**
+- **Short blast**: approximately 1 second duration
+- **Long blast**: 4 to 6 seconds duration
 
-#### 1. **Band-Pass Filtering (50-600 Hz)**
+---
+
+## 🔧 Key Improvements
+
+### 1. **Band-Pass Filtering (50-600 Hz)**
 - Removes low-frequency wind noise (<50 Hz)
 - Filters out high-frequency hiss (>600 Hz)
 - Focuses on ship horn frequency range
 - Implemented using Butterworth filter (4th order)
 
-#### 2. **Enhanced Blast Detection**
+### 2. **Enhanced Blast Detection**
 - **Threshold-based segmentation** instead of peak detection
 - Avoids over-counting on jagged/noisy signals
 - Automatic blast merging (gaps < 0.05s)
 - Minimum blast duration filtering (> 0.1s)
 
-#### 3. **Long vs Short Classification**
+### 3. **Long vs Short Classification**
 - Long blast: > 2.5 seconds (COLREG: 4-6 seconds)
 - Short blast: < 2.5 seconds (COLREG: ~1 second)
-- Accurate for complex patterns (e.g., 1 long + 2 short)
+- Accurate detection for complex patterns (e.g., 1 long + 2 short)
 
-#### 4. **Hybrid Model Architecture**
+### 4. **Hybrid Model Architecture**
 - **LSTM Model**: Uses YAMNet sequence embeddings for temporal patterns
 - **Random Forest**: Uses combined YAMNet + custom acoustic features
-- **Pattern Correction**: Rule-based validation layer
+- **Pattern Correction**: Rule-based validation layer that catches obvious errors
 
-#### 5. **Rich Feature Set**
+### 5. **Rich Feature Set**
 - YAMNet embeddings (1024D x 3 = 3072D)
 - Spectral features (centroids, rolloff, ZCR)
 - MFCCs (13 coefficients with mean/std)
@@ -139,80 +109,9 @@ All files are in the `model_8_class/` folder.
 - Energy distribution analysis
 - Temporal rhythm features
 
-### Generate Dataset
-```bash
-cd model_8_class
-python generate_improved_8class.py
-```
-> Generates realistic synthetic ship horn signals with background noise
-> Default: 100 samples per class = 800 total samples
-
-### Train Model
-```bash
-cd model_8_class
-python train_improved_8class_new.py
-```
-> Trains both Random Forest and LSTM models with GridSearchCV
-> Expected training time: 5-15 minutes depending on hardware
-> Best model is automatically selected and saved
-
-### Run Inference
-```bash
-cd model_8_class
-python inference_8class_improved.py <audio_file.wav>
-```
-
-**Examples:**
-```bash
-# Test with real recordings
-python inference_8class_improved.py 5_2.wav
-python inference_8class_improved.py 1_1.wav
-
-# Test with generated samples
-python inference_8class_improved.py dataset_v2_improved/0/0.wav
-python inference_8class_improved.py dataset_v2_improved/3/5.wav
-```
-
-### Sample Output
-```
-======================================================================
-SHIP HORN SIGNAL CLASSIFIER (8-Class Improved Model)
-======================================================================
-Model: ship_horn_classifier_8class_lstm.h5
-Model Type: LSTM
-Trained Accuracy: 96.5%
-Audio file: 5_2.wav
-======================================================================
-
-⚠️  WARNING: Detected pattern conflicts with model prediction!
-   Model predicted: Class 2 (expects 3 short blasts)
-   Actually detected: 5 blasts (0 long, 5 short)
-   → Correcting to Class 3: doubt_intentions (5 short)
-
-PREDICTION RESULTS:
-----------------------------------------------------------------------
-Predicted Class: 3
-Signal Type: doubt_intentions (5 short)
-Note: Corrected based on detected pattern
-
-Confidence Scores (All 8 Classes):
-----------------------------------------------------------------------
-→ Class 3:  95.0% ████████████████████████████████████████████████ doubt_intentions (5 short)
-
-----------------------------------------------------------------------
-DETECTED PATTERN ANALYSIS:
-----------------------------------------------------------------------
-  Number of blasts detected: 5
-  Long blasts (>2.5s): 0
-  Short blasts (<2.5s): 5
-  Average blast duration: 0.93 seconds
-  Average interval: 0.35 seconds
-======================================================================
-```
-
 ---
 
-## 🔧 Technical Details
+## 📊 Technical Details
 
 ### Audio Processing Pipeline
 
@@ -252,9 +151,43 @@ DETECTED PATTERN ANALYSIS:
 
 ---
 
-## 📝 Usage Examples
+## 💻 Usage
 
-### Quick Test with Sample Files
+### Step 1: Generate Dataset (Optional)
+```bash
+cd model_8_class
+python generate_improved_8class.py
+```
+> Generates realistic synthetic ship horn signals with background noise
+> Default: 100 samples per class = 800 total samples
+
+### Step 2: Train Model
+```bash
+cd model_8_class
+python train_improved_8class_new.py
+```
+> Trains both Random Forest and LSTM models with GridSearchCV
+> Expected training time: 5-15 minutes depending on hardware
+> Best model is automatically selected and saved
+
+### Step 3: Run Inference
+```bash
+cd model_8_class
+python inference_8class_improved.py <audio_file.wav>
+```
+
+**Examples:**
+```bash
+# Test with real recordings
+python inference_8class_improved.py 5_2.wav
+python inference_8class_improved.py 1_1.wav
+
+# Test with generated samples
+python inference_8class_improved.py dataset_v2_improved/0/0.wav
+python inference_8class_improved.py dataset_v2_improved/3/5.wav
+```
+
+### Quick Test Multiple Files
 ```bash
 cd model_8_class
 
@@ -271,7 +204,7 @@ python inference_8class_improved.py 5_2.wav
 python inference_8class_improved.py 7.wav
 ```
 
-### Process Multiple Files
+### Batch Processing
 ```bash
 cd model_8_class
 
@@ -285,28 +218,63 @@ done
 
 ---
 
+## 📤 Sample Output
+
+```
+======================================================================
+SHIP HORN SIGNAL CLASSIFIER (8-Class Improved Model)
+======================================================================
+Model: ship_horn_classifier_8class_lstm.h5
+Model Type: LSTM
+Trained Accuracy: 96.5%
+Audio file: 5_2.wav
+======================================================================
+
+⚠️  WARNING: Detected pattern conflicts with model prediction!
+   Model predicted: Class 2 (expects 3 short blasts)
+   Actually detected: 5 blasts (0 long, 5 short)
+   → Correcting to Class 3: doubt_intentions (5 short)
+
+PREDICTION RESULTS:
+----------------------------------------------------------------------
+Predicted Class: 3
+Signal Type: doubt_intentions (5 short)
+Note: Corrected based on detected pattern
+
+Confidence Scores (All 8 Classes):
+----------------------------------------------------------------------
+→ Class 3:  95.0% ████████████████████████████████████████████████ doubt_intentions (5 short)
+
+----------------------------------------------------------------------
+DETECTED PATTERN ANALYSIS:
+----------------------------------------------------------------------
+  Number of blasts detected: 5
+  Long blasts (>2.5s): 0
+  Short blasts (<2.5s): 5
+  Average blast duration: 0.93 seconds
+  Average interval: 0.35 seconds
+======================================================================
+```
+
+---
+
 ## 📁 Project Structure
 
 ```
 ship_horn_detector/
 ├── README.md                          # This file
 ├── requirements.txt                   # Python dependencies
-├── Model_4_class/                     # 4-class model (basic)
-│   ├── generate_dataset.py
-│   ├── train_model.py
-│   ├── inference.py
-│   ├── models/                        # Trained models
-│   ├── dataset/                       # Generated audio samples
-│   └── results/                       # Confusion matrices, plots
 │
-└── model_8_class/                     # 8-class model (improved)
+└── model_8_class/                     # 8-class model (main)
     ├── generate_improved_8class.py    # Dataset generator
     ├── train_improved_8class_new.py   # Training script (latest)
     ├── inference_8class_improved.py   # Inference with pattern correction
+    │
     ├── models/
     │   ├── ship_horn_classifier_8class_lstm.h5        # LSTM model
     │   ├── ship_horn_classifier_8class_improved.pkl   # Random Forest
     │   └── metadata_8class_improved.json              # Model metadata
+    │
     ├── dataset_v2_improved/           # Generated samples (8 classes)
     │   ├── 0/                         # 1 short blast
     │   ├── 1/                         # 2 short blasts
@@ -316,7 +284,16 @@ ship_horn_detector/
     │   ├── 5/                         # 1 long + 1 short
     │   ├── 6/                         # 1 long + 2 short
     │   └── 7/                         # long-short-long-short
-    └── results/                       # Training results, plots
+    │
+    ├── results/                       # Training results, plots
+    │   └── confusion_matrix_improved_8class.png
+    │
+    └── Test samples:                  # Real recordings for testing
+        ├── 1_1.wav                    # 1 short blast sample
+        ├── 2_1.wav, 2_2.wav          # 2 short blasts samples
+        ├── 3_2.wav                    # 3 short blasts sample
+        ├── 5_1.wav, 5_2.wav          # 5 short blasts samples
+        └── 7.wav                      # Agreement signal sample
 ```
 
 ---
@@ -326,9 +303,9 @@ ship_horn_detector/
 ### Issue 1: LSTM Predicts Wrong Class Despite Correct Pattern Detection
 **Problem**: LSTM model predicts Class 2 (3 short) when pattern clearly shows 5 short blasts
 
-**Root Cause**: LSTM only uses YAMNet embeddings, doesn't see blast pattern features
+**Root Cause**: LSTM only uses YAMNet embeddings, doesn't directly see blast pattern features
 
-**Solution**: Pattern-based correction layer now automatically fixes obvious mismatches
+**Solution**: ✅ Pattern-based correction layer now automatically fixes obvious mismatches
 
 ### Issue 2: CUDA/GPU Warnings
 **Problem**: TensorFlow shows GPU-related warnings on CPU-only systems
@@ -353,16 +330,17 @@ python inference_8class_improved.py <audio_file>
 
 **Rule 34 - Maneuvering and Warning Signals**
 
-- **(a)(i)**: 1 short = Altering course to starboard
-- **(a)(ii)**: 2 short = Altering course to port  
-- **(a)(iii)**: 3 short = Operating astern propulsion
-- **(c)**: Overtaking signals (1 long + 1-2 short, or agreement pattern)
-- **(d)**: 5 short = Doubt/warning signal
-- **(e)**: 1 long = Approaching blind bend
+International regulations governing sound signals for vessels:
 
-**Blast Specifications:**
-- Short blast: approximately 1 second
-- Long blast: 4 to 6 seconds
+- **(a)(i)**: **1 short blast** = I am altering my course to starboard
+- **(a)(ii)**: **2 short blasts** = I am altering my course to port  
+- **(a)(iii)**: **3 short blasts** = I am operating astern propulsion
+- **(c)**: **Overtaking signals**:
+  - 1 long + 1 short = Intending to overtake on your starboard side
+  - 1 long + 2 short = Intending to overtake on your port side
+  - Agreement: long-short-long-short pattern
+- **(d)**: **5 or more short blasts** = Doubt/warning signal (danger)
+- **(e)**: **1 long blast** = Approaching blind bend or restricted visibility area
 
 ---
 
@@ -375,6 +353,7 @@ python inference_8class_improved.py <audio_file>
 - [ ] Distance estimation from signal amplitude
 - [ ] Background noise robustness testing
 - [ ] Mobile app deployment
+- [ ] Integration with AIS (Automatic Identification System)
 
 ---
 
@@ -384,6 +363,7 @@ python inference_8class_improved.py <audio_file>
 - **TensorFlow/Keras**: Deep learning framework
 - **Librosa**: Audio processing library
 - **scikit-learn**: Machine learning algorithms
+- **COLREG**: International Maritime Organization regulations
 
 ---
 
